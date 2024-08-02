@@ -18,7 +18,7 @@ In BootstrapHook.php line 32:
   [Exception]                                                         
   Bootstrap failed. Run your command with -vvv for more information.
 ```
-- T bootstrap failed as it was unable to connect to the database.
+- The bootstrap failed as it was unable to connect to the database.
 - After being lost in possible fixes online for quite some time, running `vendor/drush/drush/drush cr` (cache rebuild), finally got me to this error, saying that the driver could not be found:
 
 ```
@@ -67,3 +67,4 @@ Now for the assignment, I have to implement the `/nodes/list` endpoint, so that 
 - To add pagination, I probably only want to give back part of the nodes, depending on the page requested. I will use the Pager class of Drupal and add a limit of 1 for now to see if pagination works, and I want to request only these nodes from the database.
 - Pagination now works, I can now request different pages by asking for: `http://127.0.0.1:8000/nodes/list?page=2`, if none of the page parameter is not set in the request, it will default to page 1
 - I also want to give the amount of pages and the total amount of pages back in the response so that links can be made to other pages.  
+- A limit of 2 also seems to work

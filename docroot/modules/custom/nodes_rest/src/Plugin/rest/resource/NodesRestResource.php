@@ -68,7 +68,7 @@ class NodesRestResource extends ResourceBase {
    */
   public function get(Request $request) {
     $page = $request->query->get('page', 1);
-    $limit = 1;
+    $limit = 2;
     $offset = ($page - 1) * $limit;
 
     # sort them DESC-> show newest nodes first
