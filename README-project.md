@@ -18,19 +18,19 @@ In BootstrapHook.php line 32:
   [Exception]                                                         
   Bootstrap failed. Run your command with -vvv for more information.
 ```
-- The bootstrap failed as it was unable to connect to the database.
+- T bootstrap failed as it was unable to connect to the database.
 - After being lost in possible fixes online for quite some time, running `vendor/drush/drush/drush cr` (cache rebuild), finally got me to this error, saying that the driver could not be found:
 
 ```
-[preflight] Commandfile search paths: /home/gent/Downloads/UncInc-drupal-assessment-2021/drupal/vendor/drush/drush/src
+[preflight] Commandfile search paths: <deprecated>/UncInc-drupal-assessment-2021/drupal/vendor/drush/drush/src
  [debug] Starting bootstrap to site [0.07 sec, 8.15 MB]
  [debug] Drush bootstrap phase 2 [0.07 sec, 8.15 MB]
  [debug] Try to validate bootstrap phase 2 [0.07 sec, 8.15 MB]
  [debug] Try to validate bootstrap phase 2 [0.07 sec, 8.15 MB]
  [debug] Try to bootstrap at phase 2 [0.07 sec, 8.15 MB]
  [debug] Drush bootstrap phase: bootstrapDrupalRoot() [0.07 sec, 8.15 MB]
- [debug] Change working directory to /home/gent/Downloads/UncInc-drupal-assessment-2021/drupal/docroot [0.07 sec, 8.15 MB]
- [debug] Initialized Drupal 8.8.10 root directory at /home/gent/Downloads/UncInc-drupal-assessment-2021/drupal/docroot [0.08 sec, 8.35 MB]
+ [debug] Change working directory to <deprecated>/UncInc-drupal-assessment-2021/drupal/docroot [0.07 sec, 8.15 MB]
+ [debug] Initialized Drupal 8.8.10 root directory at <deprecated>/UncInc-drupal-assessment-2021/drupal/docroot [0.08 sec, 8.35 MB]
  [debug] Try to validate bootstrap phase 2 [0.08 sec, 8.34 MB]
  [debug] Try to bootstrap at phase 2 [0.08 sec, 8.63 MB]
  [debug] Drush bootstrap phase: bootstrapDrupalSite() [0.08 sec, 8.63 MB]
@@ -51,11 +51,19 @@ The objective of the assignment:
 - Currently, this install contains no nodes and no content types. It is up to you to create them and give them fields (minimum of 3 with one being a long text)
 #### 2. Steps
 Now for the assignment, I have to implement the `/nodes/list` endpoint, so that it returns nodes of all types. Steps I will take to do this:
-- [ ] First figure out what they mean by nodes
-- [ ] Figure out the location of nodes
-- [ ] Then apparently there are no nodes yet, so I have to create some nodes myself, of different content types (min. of 3 and one being a long text). I should also give them fields
-- [ ] Figure out how to give back all these nodes, independent of the content type of a node
-- [ ] Include pagination
+- [x] First figure out what they mean by nodes
+- [x] Figure out the location of nodes
+- [x] Then apparently there are no nodes yet, so I have to create some nodes myself, of different content types (min. of 3 and one being a long text). I should also give them fields
+- [x] Figure out how to give back all these nodes, independent of the content type of a node
+- [x] Include pagination
 - [ ] (optional type filter)
 ### Thoughts along the way
-- 
+- This is my first time using Drupal so I find it harder to come up with an initial plan
+- The endpoint is sitting in `docroot/modules/custom/nodes_rest/src/Plugin/rest/resource`. I'm not sure how to activate changes I make there -> `drush rs` does not seem to do it but `drush cr` does.
+- There is a `/node/add` endpoint, but it says there are no content types yet-> first create content types at `/admin/structure/types/add`
+- I added 3 different content types: `article`, `event` and `job_listing`. I also added a node for each of them and when I browse the database using `sqlitebrowser` I can indeed see them in the `node` table.
+- 1 thing I did have to do run to fix some errors: `vendor/drush/drush/drush theme:enable stark`
+- By searching online, I think I need to get the node IDs and then load these nodes and then probably loop over them to put them into the output of the endpoint
+- To add pagination, I probably only want to give back part of the nodes, depending on the page requested. I will use the Pager class of Drupal and add a limit of 1 for now to see if pagination works, and I want to request only these nodes from the database.
+- Pagination now works, I can now request different pages by asking for: `http://127.0.0.1:8000/nodes/list?page=2`, if none of the page parameter is not set in the request, it will default to page 1
+- I also want to give the amount of pages and the total amount of pages back in the response so that links can be made to other pages.  
