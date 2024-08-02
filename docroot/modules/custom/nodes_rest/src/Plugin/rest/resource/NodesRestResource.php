@@ -8,6 +8,9 @@ use Drupal\rest\Plugin\ResourceBase;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Pager\PagerManagerInterface;
+use Drupal\Core\Pager\PagerManager;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Provides a resource to get the results of a view.
@@ -63,10 +66,44 @@ class NodesRestResource extends ResourceBase {
   /**
    * {@inheritdoc}
    */
-  public function get() {
-    $output = [
-      'BLA',
+  public function get(Request $request) {
+    $page = $request->query->get('page', 1);
+    $limit = 1;
+    $offset = ($page - 1) * $limit;
+
+    # sort them DESC-> show newest nodes first
+    $query = \Drupal::entityQuery('node')
+      ->range($offset, $limit)
+      ->sort('created', 'DESC');
+    $nids = $query->execute();
+
+    $nodes = \Drupal\node\Entity\Node::loadMultiple($nids);
+
+    $output = [];
+    foreach ($nodes as $node) {
+      $output[] = [
+        'id' => $node->id(),
+        'title' => $node->getTitle(),
+        'type' => $node->getType(),
+        'body' => $node->get('body')->value,
+        'created' => date('c', $node->getCreatedTime()),
+      ];
+    }
+
+    $total_count = \Drupal::entityQuery('node')->count()->execute();
+    $total_pages = ceil($total_count / $limit);
+
+    $pagination = [
+      'current_page' => $page,
+      'per_page' => $limit,
+      'total_count' => $total_count,
+      'total_pages' => $total_pages,
     ];
+
+    $response = new ResourceResponse([
+      'data' => $output,
+      'pagination' => $pagination,
+    ], 200);
 
     $response = new ResourceResponse($output, 200);
 
